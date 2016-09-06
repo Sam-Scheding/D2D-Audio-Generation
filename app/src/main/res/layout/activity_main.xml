@@ -91,14 +91,31 @@
         android:layout_alignLeft="@+id/six_button"
         android:layout_alignStart="@+id/six_button" />
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Frequency: "
-        android:id="@+id/frequency_text"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="43dp" />
+        android:text="Start"
+        android:id="@+id/start_button"
+        android:layout_below="@+id/seven_button"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="47dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop"
+        android:id="@+id/stop_button"
+        android:layout_alignTop="@+id/start_button"
+        android:layout_alignLeft="@+id/nine_button"
+        android:layout_alignStart="@+id/nine_button" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Switch to Receiver"
+        android:id="@+id/receiver_button"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

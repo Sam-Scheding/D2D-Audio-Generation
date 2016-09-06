@@ -1,11 +1,6 @@
 package com.example.work.d2daudiocommunication;
 
-
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
 import android.media.ToneGenerator;
-import android.os.Handler;
 
 public class SoundGenerator {
 
@@ -19,8 +14,7 @@ public class SoundGenerator {
         streamType = 0;
     }
 
-    void playSound(final int dtmfTone){
-
+    void playSound(int dtmfTone){
 
         ToneGenerator dtmfGenerator = new ToneGenerator(streamType, volume);
         dtmfGenerator.startTone(dtmfTone, duration); // all types of tones are available...

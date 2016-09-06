@@ -1,6 +1,6 @@
 package com.example.work.d2daudiocommunication;
 
-import android.os.Handler;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,13 +10,11 @@ import android.media.ToneGenerator;
 public class MainActivity extends AppCompatActivity {
 
     private SoundGenerator sg;
-    Handler handler;
-
+    private Button receiverButton;
     private Button  oneButton, twoButton, threeButton,
                     fourButton, fiveButton, sixButton,
-                    sevenButton, eightButton, nineButton;
-//    private int freqX1 = 1209, freqX2 = 1336, freqX3 = 1477;
-//    private int freqY1 = 697, freqY2 = 770, freqY3 = 852;
+                    sevenButton, eightButton, nineButton,
+                    startButton, stopButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         sg = new SoundGenerator();
-        handler = new Handler();
         oneButton = (Button) this.findViewById(R.id.one_button);
         twoButton = (Button) this.findViewById(R.id.two_button);
         threeButton = (Button) this.findViewById(R.id.three_button);
@@ -34,7 +31,32 @@ public class MainActivity extends AppCompatActivity {
         sevenButton = (Button) this.findViewById(R.id.seven_button);
         eightButton = (Button) this.findViewById(R.id.eight_button);
         nineButton = (Button) this.findViewById(R.id.nine_button);
-        
+        startButton = (Button) this.findViewById(R.id.start_button);
+        stopButton = (Button) this.findViewById(R.id.stop_button);
+        receiverButton = (Button) this.findViewById(R.id.receiver_button);
+
+        receiverButton.setOnClickListener(new View.OnClickListener(){
+
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), Receiver.class));
+            }
+        });
+
+
+        startButton.setOnClickListener(new View.OnClickListener(){
+
+            public void onClick(View v) {
+                System.out.println("Start Transmission");
+            }
+        });
+
+        stopButton.setOnClickListener(new View.OnClickListener(){
+
+            public void onClick(View v) {
+                System.out.println("Stop Transmission");
+            }
+        });
+
         oneButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {

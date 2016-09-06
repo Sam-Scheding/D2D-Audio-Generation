@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.media.ToneGenerator;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -14,8 +15,8 @@ public class MainActivity extends AppCompatActivity {
     private Button  oneButton, twoButton, threeButton,
                     fourButton, fiveButton, sixButton,
                     sevenButton, eightButton, nineButton;
-    private int freqX1 = 1209, freqX2 = 1336, freqX3 = 1477;
-    private int freqY1 = 697, freqY2 = 770, freqY3 = 852;
+//    private int freqX1 = 1209, freqX2 = 1336, freqX3 = 1477;
+//    private int freqY1 = 697, freqY2 = 770, freqY3 = 852;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,44 +34,18 @@ public class MainActivity extends AppCompatActivity {
         sevenButton = (Button) this.findViewById(R.id.seven_button);
         eightButton = (Button) this.findViewById(R.id.eight_button);
         nineButton = (Button) this.findViewById(R.id.nine_button);
-
+        
         oneButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-
-                // Use a new tread as this can take a while
-                final Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        sg.genTone(freqX1, freqY1);
-                        handler.post(new Runnable() {
-
-                            public void run() {
-                                sg.playSound();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                sg.playSound(ToneGenerator.TONE_DTMF_1);
             }
         });
 
         twoButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-
-                // Use a new tread as this can take a while
-                final Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        sg.genTone(freqX2, freqY1);
-                        handler.post(new Runnable() {
-
-                            public void run() {
-                                sg.playSound();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                sg.playSound(ToneGenerator.TONE_DTMF_2);
             }
         });
 
@@ -78,140 +53,49 @@ public class MainActivity extends AppCompatActivity {
         threeButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-
-                // Use a new tread as this can take a while
-                final Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        sg.genTone(freqX3, freqY1);
-                        handler.post(new Runnable() {
-
-                            public void run() {
-                                sg.playSound();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                sg.playSound(ToneGenerator.TONE_DTMF_3);
             }
         });
 
         fourButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-
-                // Use a new tread as this can take a while
-                final Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        sg.genTone(freqX1, freqY2);
-                        handler.post(new Runnable() {
-
-                            public void run() {
-                                sg.playSound();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                sg.playSound(ToneGenerator.TONE_DTMF_4);
             }
         });
 
         fiveButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-
-                // Use a new tread as this can take a while
-                final Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        sg.genTone(freqX2, freqY2);
-                        handler.post(new Runnable() {
-
-                            public void run() {
-                                sg.playSound();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                sg.playSound(ToneGenerator.TONE_DTMF_5);
             }
         });
 
         sixButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-
-                // Use a new tread as this can take a while
-                final Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        sg.genTone(freqX3, freqY2);
-                        handler.post(new Runnable() {
-
-                            public void run() {
-                                sg.playSound();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                sg.playSound(ToneGenerator.TONE_DTMF_6);
             }
         });
 
         sevenButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-
-                // Use a new tread as this can take a while
-                final Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        sg.genTone(freqX1, freqY3);
-                        handler.post(new Runnable() {
-
-                            public void run() {
-                                sg.playSound();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                sg.playSound(ToneGenerator.TONE_DTMF_7);
             }
         });
 
         eightButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-
-                // Use a new tread as this can take a while
-                final Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        sg.genTone(freqX2, freqY3);
-                        handler.post(new Runnable() {
-
-                            public void run() {
-                                sg.playSound();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                sg.playSound(ToneGenerator.TONE_DTMF_8);
             }
         });
 
         nineButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-
-                // Use a new tread as this can take a while
-                final Thread thread = new Thread(new Runnable() {
-                    public void run() {
-                        sg.genTone(freqX3, freqY3);
-                        handler.post(new Runnable() {
-
-                            public void run() {
-                                sg.playSound();
-                            }
-                        });
-                    }
-                });
-                thread.start();
+                sg.playSound(ToneGenerator.TONE_DTMF_9);
             }
         });
     }

@@ -4,47 +4,28 @@ package com.example.work.d2daudiocommunication;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.ToneGenerator;
+import android.os.Handler;
 
 public class SoundGenerator {
 
-    // originally from http://marblemice.blogspot.com/2010/04/generate-and-play-tone-in-android.html
-    // and modified by Steve Pomeroy <steve@staticfree.info>
-    private final int duration = 1; // seconds
-    private final int sampleRate = 8000;
-    private final int numSamples = duration * sampleRate;
-    private final double sample[] = new double[numSamples];
+    private int duration;
+    private int volume;
+    private int streamType;
 
-    private final byte generatedSnd[] = new byte[2 * numSamples];
-
-
-    void genTone(int freqX, int freqY){
-
-        int freqOfTone = freqX + freqY;
-        // fill out the array
-        for (int i = 0; i < numSamples; ++i) {
-            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfTone));
-        }
-
-        // convert to 16 bit pcm sound array
-        // assumes the sample buffer is normalised.
-        int idx = 0;
-        for (final double dVal : sample) {
-            // scale to maximum amplitude
-            final short val = (short) ((dVal * 32767));
-            // in 16 bit wav PCM, first byte is the low order byte
-            generatedSnd[idx++] = (byte) (val & 0x00ff);
-            generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
-
-        }
+    public SoundGenerator(){
+        duration = 1000; // milliseconds
+        volume = 50;
+        streamType = 0;
     }
 
-    void playSound(){
-        final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                sampleRate, AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT, generatedSnd.length,
-                AudioTrack.MODE_STATIC);
-        audioTrack.write(generatedSnd, 0, generatedSnd.length);
-        audioTrack.play();
+    void playSound(final int dtmfTone){
+
+
+        ToneGenerator dtmfGenerator = new ToneGenerator(streamType, volume);
+        dtmfGenerator.startTone(dtmfTone, duration); // all types of tones are available...
+        dtmfGenerator.stopTone();
+
     }
 
 }

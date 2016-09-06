@@ -9,16 +9,17 @@ public class SoundGenerator {
 
     // originally from http://marblemice.blogspot.com/2010/04/generate-and-play-tone-in-android.html
     // and modified by Steve Pomeroy <steve@staticfree.info>
-    private final int duration = 3; // seconds
+    private final int duration = 1; // seconds
     private final int sampleRate = 8000;
     private final int numSamples = duration * sampleRate;
     private final double sample[] = new double[numSamples];
-    private final double freqOfTone = 440; // hz
 
     private final byte generatedSnd[] = new byte[2 * numSamples];
 
 
-    void genTone(){
+    void genTone(int freqX, int freqY){
+
+        int freqOfTone = freqX + freqY;
         // fill out the array
         for (int i = 0; i < numSamples; ++i) {
             sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfTone));

@@ -27,4 +27,31 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="74dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Play"
+        android:id="@+id/play_button"
+        android:layout_alignTop="@+id/pause_button"
+        android:layout_toLeftOf="@+id/transmitter_button"
+        android:layout_toStartOf="@+id/transmitter_button" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pause"
+        android:id="@+id/pause_button"
+        android:layout_alignTop="@+id/record_button"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record"
+        android:id="@+id/record_button"
+        android:layout_marginTop="150dp"
+        android:layout_below="@+id/frequency_text"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

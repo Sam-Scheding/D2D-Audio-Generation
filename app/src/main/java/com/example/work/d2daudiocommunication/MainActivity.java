@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         sg = new SoundGenerator();
         oneButton = (Button) this.findViewById(R.id.one_button);
         twoButton = (Button) this.findViewById(R.id.two_button);

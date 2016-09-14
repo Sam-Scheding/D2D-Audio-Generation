@@ -4,13 +4,13 @@ import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.concurrent.locks.ReentrantLock;
 
 
 public class Receiver extends AppCompatActivity {
@@ -21,9 +21,9 @@ public class Receiver extends AppCompatActivity {
     private byte[] audioData;
     private int bufferSize, numWrittenBytes;
     private AudioRecord recorder;
-    private Thread recordingThread = null;
+    private double frequency;
     private TextView frequencyText;
-    private ReentrantLock lock;
+    public boolean recordingBool;
 
 
     @Override
@@ -33,15 +33,17 @@ public class Receiver extends AppCompatActivity {
 
         bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
         audioData = new byte[bufferSize]; // maybe should be 1024 instead?
-        lock = new ReentrantLock();
+        recordingBool = false;
         frequencyText = (TextView)findViewById(R.id.frequency_text);
         transmitterButton = (Button) this.findViewById(R.id.transmitter_button);
         transmitterButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
+                recordingBool = false;
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             }
         });
+
 
 
         stopButton=(Button)findViewById(R.id.pause_button);
@@ -52,20 +54,17 @@ public class Receiver extends AppCompatActivity {
         recordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,SAMPLE_RATE,AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
-                    recorder.startRecording();
-                    recordingThread = new Thread(new Runnable() {
-                        public void run() {
-                            processAudio();
-                        }
-                    }, "AudioRecorder Thread");
-                    recordingThread.start();
 
+                Recorder myRecorder = new Recorder();
 
-                } catch (IllegalStateException e) { e.printStackTrace(); }
+                double peak;
+                int x = 0;
+                recordingBool = true;
 
+                recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+                System.out.println("THIS IS RECORDING NOW");
 
+                myRecorder.execute();
 
                 recordButton.setEnabled(false);
                 stopButton.setEnabled(true);
@@ -77,36 +76,54 @@ public class Receiver extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                recordingBool = false;
+                System.out.println("STOP BUTTON PRESSED");
                 if(recorder != null){
-
                     recorder.stop();
                     recorder.release();
                 }
-                recordingThread = null;
+                System.out.println("RECORDER PROB NOT BEING RELEASED?");
+
                 stopButton.setEnabled(false);
                 recordButton.setEnabled(true);
             }
         });
     }
 
-    private void processAudio() {
-        // Write the output audio in byte
 
-        while (recorder.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
+    private class Recorder extends AsyncTask<Void, Double, Void>{
 
-            int x;
-            lock.lock();
-            numWrittenBytes = recorder.read(audioData, 0, bufferSize);
-            lock.unlock();
 
-            for(x=0; x<numWrittenBytes; x++){
-                lock.lock();
-                System.out.print(audioData[x]);
-                lock.unlock();
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            double peak = -1.0;
+            numWrittenBytes = recorder.read(audioData, 0, bufferSize); //.read() not guaranteed to write the whole buffer
+            frequency = (SAMPLE_RATE * peak) / bufferSize;
+
+            while (recordingBool) {
+
+                try {
+                    Thread.sleep(1000);
+//                    for(int i = 0; i < numWrittenBytes; i++){
+//                        // Process magnitude here
+//
+//                    }
+                    System.out.println("Still here for some reason");
+                    publishProgress(frequency);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            System.out.print("\n:::");
-
+            System.out.println("DOES IT EVER GET HERE?");
+            return null;
         }
 
+        protected void onProgressUpdate(Double... values){
+            System.out.println("Frequncy is: " + values[0]);
+
+            String frequencyString = Double.toString(values[0]);
+            frequencyText.setText("Frequency is: " + frequencyString);
+        }
     }
 }

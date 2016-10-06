@@ -10,7 +10,7 @@ public class Goertzel{
     private long n;
     private double coeff, Q1, Q2;
     private double sine,cosine;
-    public Goertzel( float samplingRate, float targetFrequency, long inN) {
+    public Goertzel(float samplingRate, float targetFrequency, long inN) {
 
         this.samplingRate = samplingRate;
         this.targetFrequency = targetFrequency;

@@ -18,6 +18,9 @@ public class SoundGenerator {
 
         ToneGenerator dtmfGenerator = new ToneGenerator(streamType, volume);
         dtmfGenerator.startTone(dtmfTone, duration); // all types of tones are available...
+        try{
+            Thread.sleep(duration);
+        } catch (InterruptedException e){}
         dtmfGenerator.stopTone();
 
     }

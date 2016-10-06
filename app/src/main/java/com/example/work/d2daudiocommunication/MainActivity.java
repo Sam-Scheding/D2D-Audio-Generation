@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         receiverButton.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), Receiver.class));
+                startActivity(new Intent(getApplicationContext(), ReceiverActivity.class));
             }
         });
 

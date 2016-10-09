@@ -17,9 +17,8 @@ public class ReceiverActivity extends AppCompatActivity {
     private Button transmitterButton;
     private Button stopButton,recordButton;
     private byte[] audioData;
-    private int bufferSize, numWrittenBytes;
+    private int bufferSize;
     private AudioRecord recorder;
-    private double frequency;
     private TextView frequencyText;
     public boolean recordingBool;
 
@@ -83,74 +82,99 @@ public class ReceiverActivity extends AppCompatActivity {
         });
     }
 
-    private int processSignal(byte[] buffer){
 
-        int[] freqs = {697, 770, 852, 1209, 1336, 1477};
-        double[] magnitudes;
 
-        magnitudes = getMagnitudesFromBuffer(buffer, freqs);
-        int[] dualToneFreqs = getFrequenciesFromMagnitudes(magnitudes, freqs);
-        return getKeyFromFrequencies(dualToneFreqs[0], dualToneFreqs[1]);
-    }
+    private double[] getMagnitudesFromBuffer(byte buffer[]){
 
-    private double[] getMagnitudesFromBuffer(byte buffer[], int freqs[]){
         Goertzel g;
-        int blockSize = 205, x = 0;
-        double[] magnitudes = new double[freqs.length];
+        double[] magnitudes = new double[Constants.DTMF_FREQUENCIES.length];
+        int x = 0;
+        double[] parts = new double[2];
+        double real, imag, magnitudeSquared, magnitude;
+        for(int freq : Constants.DTMF_FREQUENCIES){
+            g = new Goertzel(Constants.SAMPLE_RATE, freq, Constants.BLOCK_SIZE);
 
-        for(int freq : freqs){
-
-            g = new Goertzel(Constants.SAMPLE_RATE, freq, blockSize);
-            g.initGoertzel();
-            for (int i=0; i<blockSize;i++){
-                g.processSample(buffer[i]);
+            for(int index = 0; index < Constants.BLOCK_SIZE; index++){
+                g.processSample(buffer[index]);
             }
-            double[] parts = new double[2];
-            parts = g.getRealImag(parts);
-            double real = parts[0];
-            double imag = parts[1];
 
-            double magnitudeSquared = real*real + imag*imag;
-            System.out.println("rel mag^2= " + magnitudeSquared);
-            magnitudes[x] = magnitudeSquared;
-            g.resetGoertzel();
-            x++;
+        	/* Do the "basic Goertzel" processing. */
+            parts = g.getRealImag(parts);
+            real = parts[0];
+            imag = parts[1];
+
+
+            magnitudeSquared = real*real + imag*imag;
+            magnitude = Math.sqrt(magnitudeSquared);
+            System.out.println("Freq: " + freq + " Magnitude: " + magnitude);
+            magnitudes[x++] = magnitude;
+
+//            g = new Goertzel(Constants.SAMPLE_RATE, freq, Constants.BLOCK_SIZE);
+//            g.initGoertzel();
+//            for(int i=0; i<Constants.BLOCK_SIZE;i++){
+//                g.processSample(buffer[i]);
+//            }
+//
+//            double[] parts = new double[2];
+//            parts = g.getRealImag(parts);
+//            double real = parts[0];
+//            double imag = parts[1];
+//            double magnitudeSquared = real*real + imag*imag;
+//
+//            System.out.println("Frequency: " + freq + " - At magnitude: " + magnitudeSquared);
+//            magnitudes[x++] = magnitudeSquared;
+//            g.resetGoertzel();
         }
 
         return magnitudes;
     }
 
-    private static int[] getFrequenciesFromMagnitudes(double magnitudes[], int freqs[]){
-        int largestA = 0, largestB = 0;
-        int x = 0;
-        for(double mag : magnitudes) {
+    private static int[] getTwoLoudestFrequenciesFromMagnitudes(double magnitudes[]){
+        double highest = Double.MIN_VALUE;
+        double secondHighest = Double.MIN_VALUE;
+        int highestPos = 0, secondHighestPos = 0;
+        int freq1 = 0, freq2 = 0;
+        for (int i = 0; i < magnitudes.length; i++){
 
-            if(mag <350000){ continue; }// not over threshold, continue
-            if(mag > largestA) {
-                largestB = largestA;
-                largestA = x;
-            } else if (x > largestB) {
-                largestB = x;
+            if (magnitudes[i] > highest){
+
+                secondHighest = highest;
+                secondHighestPos = highestPos;
+                highest = magnitudes[i];
+                highestPos = i;
+
+            } else if (magnitudes[i] > secondHighest){
+
+                secondHighest = magnitudes[i];
+                secondHighestPos = i;
             }
-            x++;
         }
-        int freq1 = freqs[largestA];
-        int freq2 = freqs[largestB];
-        return new int[] { freq1, freq2};
+        System.out.println("Largest element is at        "+ highestPos);
+        System.out.println("Second largest element is at "+ secondHighestPos);
+
+
+        if(highest > Constants.THRESHOLD){ freq1 = Constants.DTMF_FREQUENCIES[highestPos]; }
+        if(secondHighest > Constants.THRESHOLD){ freq2 = Constants.DTMF_FREQUENCIES[secondHighestPos]; }
+
+        System.out.println("Choosing "+ freq1 + " as the first  frequency");
+        System.out.println("Choosing "+ freq2 + " as the second frequency");
+
+        return new int[] {freq1, freq2};
     }
 
     private int getKeyFromFrequencies(int freq1, int freq2){
 
-        int mult = freq1*freq2;
-        if(mult == 697*1209){return 1; }
-        if(mult == 697*1336){return 2; }
-        if(mult == 697*1477){return 3; }
-        if(mult == 770*1209){return 4; }
-        if(mult == 770*1336){return 5; }
-        if(mult == 770*1477){return 6; }
-        if(mult == 852*1209){return 7; }
-        if(mult == 852*1336){return 8; }
-        if(mult == 852*1477){return 9; }
+        // utilises the fact that the product of any two dtmf frequencies is unique
+        int freqProduct = freq1*freq2;
+        if(freqProduct == Constants.DTMF1_PRODUCT){ return 1; }
+        if(freqProduct == Constants.DTMF2_PRODUCT){ return 2; }
+        if(freqProduct == Constants.DTMF3_PRODUCT){ return 3; }
+        if(freqProduct == Constants.DTMF4_PRODUCT){ return 4; }
+        if(freqProduct == Constants.DTMF5_PRODUCT){ return 5; }
+        if(freqProduct == Constants.DTMF6_PRODUCT){ return 6; }
+        if(freqProduct == Constants.DTMF7_PRODUCT){ return 7; }
+        if(freqProduct == Constants.DTMF8_PRODUCT){ return 8; }
+        if(freqProduct == Constants.DTMF9_PRODUCT){ return 9; }
         return -1;
     }
 
@@ -164,11 +188,16 @@ public class ReceiverActivity extends AppCompatActivity {
 
             while (recordingBool) {
 
-                recorder.read(audioData, 0, audioData.length);
+                recorder.read(audioData, 0, bufferSize);
                 try {
                     Thread.sleep(1000);
-                    int keyPressed = processSignal(audioData);
+
+                    double[] magnitudes = getMagnitudesFromBuffer(audioData);
+                    int[] dualToneFreqs = getTwoLoudestFrequenciesFromMagnitudes(magnitudes);
+                    int keyPressed =  getKeyFromFrequencies(dualToneFreqs[0], dualToneFreqs[1]);
+
                     publishProgress((double)keyPressed);
+
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -179,8 +208,13 @@ public class ReceiverActivity extends AppCompatActivity {
         protected void onProgressUpdate(Double... values){
 //            System.out.println("Frequency is: " + values[0]);
 
-            String buttonNum = Double.toString(values[0]);
-            frequencyText.setText("The " + buttonNum + " was pressed");
+            double dButtonNum = Double.valueOf(values[0]);
+            int buttonNum = (int)dButtonNum;
+            if(buttonNum == -1){
+                frequencyText.setText("No tone detected.");
+            } else {
+                frequencyText.setText("The " + buttonNum + " was pressed");
+            }
         }
     }
 }

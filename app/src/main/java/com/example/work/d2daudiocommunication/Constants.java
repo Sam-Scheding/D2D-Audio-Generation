@@ -5,9 +5,9 @@ package com.example.work.d2daudiocommunication;
  */
 public class Constants {
 
-    public static final int SAMPLE_RATE = 8000;
-    public static final int THRESHOLD = 500;
-    public static final int BLOCK_SIZE = 105;
+    public static final int SAMPLE_RATE = 44100;
+    public static final int THRESHOLD = 300;
+    public static final int BLOCK_SIZE = 100;
 
     public static final int DTMF_697 = 0;
     public static final int DTMF_770 = 1;

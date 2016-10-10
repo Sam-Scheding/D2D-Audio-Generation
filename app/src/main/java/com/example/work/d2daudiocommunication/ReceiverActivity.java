@@ -16,8 +16,6 @@ public class ReceiverActivity extends AppCompatActivity {
 
     private Button transmitterButton;
     private Button stopButton,recordButton;
-    private byte[] audioData;
-    private int bufferSize;
     private AudioRecord recorder;
     private TextView frequencyText;
     public boolean recordingBool;
@@ -28,8 +26,6 @@ public class ReceiverActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receiver);
 
-        bufferSize = AudioRecord.getMinBufferSize(Constants.SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-        audioData = new byte[bufferSize]; // maybe should be 1024 instead?
         recordingBool = false;
         frequencyText = (TextView)findViewById(R.id.frequency_text);
         transmitterButton = (Button) this.findViewById(R.id.transmitter_button);
@@ -54,7 +50,8 @@ public class ReceiverActivity extends AppCompatActivity {
 
                 Recorder myRecorder = new Recorder();
                 recordingBool = true;
-                recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, Constants.SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+                int size = AudioRecord.getMinBufferSize(Constants.SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+                recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, Constants.SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, size);
                 System.out.println("STARTED RECORDING");
 
                 myRecorder.execute();
@@ -102,28 +99,13 @@ public class ReceiverActivity extends AppCompatActivity {
             parts = g.getRealImag(parts);
             real = parts[0];
             imag = parts[1];
-
+            g.resetGoertzel();
 
             magnitudeSquared = real*real + imag*imag;
             magnitude = Math.sqrt(magnitudeSquared);
-            System.out.println("Freq: " + freq + " Magnitude: " + magnitude);
-            magnitudes[x++] = magnitude;
-
-//            g = new Goertzel(Constants.SAMPLE_RATE, freq, Constants.BLOCK_SIZE);
-//            g.initGoertzel();
-//            for(int i=0; i<Constants.BLOCK_SIZE;i++){
-//                g.processSample(buffer[i]);
-//            }
-//
-//            double[] parts = new double[2];
-//            parts = g.getRealImag(parts);
-//            double real = parts[0];
-//            double imag = parts[1];
-//            double magnitudeSquared = real*real + imag*imag;
-//
-//            System.out.println("Frequency: " + freq + " - At magnitude: " + magnitudeSquared);
-//            magnitudes[x++] = magnitudeSquared;
-//            g.resetGoertzel();
+            magnitudes[x] = magnitude;
+            System.out.println("Freq: " + freq + " Magnitude: " + magnitudes[x] + "->" + x);
+            x++;
         }
 
         return magnitudes;
@@ -131,30 +113,28 @@ public class ReceiverActivity extends AppCompatActivity {
 
     private static int[] getTwoLoudestFrequenciesFromMagnitudes(double magnitudes[]){
         double highest = Double.MIN_VALUE;
-        double secondHighest = Double.MIN_VALUE;
-        int highestPos = 0, secondHighestPos = 0;
+        int highestPos = 0;
         int freq1 = 0, freq2 = 0;
-        for (int i = 0; i < magnitudes.length; i++){
 
+        for (int i = 0; i < magnitudes.length/2; i++){ // get largest vertical magnitude
             if (magnitudes[i] > highest){
-
-                secondHighest = highest;
-                secondHighestPos = highestPos;
                 highest = magnitudes[i];
                 highestPos = i;
-
-            } else if (magnitudes[i] > secondHighest){
-
-                secondHighest = magnitudes[i];
-                secondHighestPos = i;
             }
         }
         System.out.println("Largest element is at        "+ highestPos);
-        System.out.println("Second largest element is at "+ secondHighestPos);
-
-
         if(highest > Constants.THRESHOLD){ freq1 = Constants.DTMF_FREQUENCIES[highestPos]; }
-        if(secondHighest > Constants.THRESHOLD){ freq2 = Constants.DTMF_FREQUENCIES[secondHighestPos]; }
+        highestPos = 0;
+        highest = Double.MIN_VALUE;
+        for (int i = magnitudes.length/2; i < magnitudes.length; i++){ // get largest horizontal magnitude
+            if (magnitudes[i] > highest){
+                highest = magnitudes[i];
+                highestPos = i;
+            }
+        }
+        System.out.println("Second largest element is at "+ highestPos);
+        if(highest> Constants.THRESHOLD){ freq2 = Constants.DTMF_FREQUENCIES[highestPos]; }
+
 
         System.out.println("Choosing "+ freq1 + " as the first  frequency");
         System.out.println("Choosing "+ freq2 + " as the second frequency");
@@ -181,16 +161,21 @@ public class ReceiverActivity extends AppCompatActivity {
 
     private class Recorder extends AsyncTask<Void, Double, Void>{
 
+        private byte[] audioData;
+        private int bufferSize;
 
         @Override
         protected Void doInBackground(Void... params) {
+
+            bufferSize = AudioRecord.getMinBufferSize(Constants.SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+            audioData = new byte[bufferSize]; // maybe should be 1024 instead?
 
 
             while (recordingBool) {
 
                 recorder.read(audioData, 0, bufferSize);
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(50);
 
                     double[] magnitudes = getMagnitudesFromBuffer(audioData);
                     int[] dualToneFreqs = getTwoLoudestFrequenciesFromMagnitudes(magnitudes);
